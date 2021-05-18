@@ -103,4 +103,5 @@ public interface CustomerService {
      * @return - List of the coupons.
      */
     Optional<List<Coupon>> getAllCouponsByCategory(long id, int category);
+
 }

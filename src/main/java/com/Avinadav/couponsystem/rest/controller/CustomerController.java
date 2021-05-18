@@ -4,10 +4,7 @@ import com.Avinadav.couponsystem.data.repo.CouponRepository;
 import com.Avinadav.couponsystem.data.repo.CustomerRepository;
 import com.Avinadav.couponsystem.entity.Coupon;
 import com.Avinadav.couponsystem.entity.Customer;
-import com.Avinadav.couponsystem.rest.ex.FetchException;
-import com.Avinadav.couponsystem.rest.ex.InvalidLoginException;
-import com.Avinadav.couponsystem.rest.ex.PurchaseCouponException;
-import com.Avinadav.couponsystem.rest.ex.RemoveException;
+import com.Avinadav.couponsystem.rest.ex.*;
 import com.Avinadav.couponsystem.rest.login.ClientSession;
 import com.Avinadav.couponsystem.service.CustomerService;
 import com.Avinadav.couponsystem.service.CustomerServicePerform;
@@ -22,7 +19,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-
+@CrossOrigin
 @RestController
 @RequestMapping("/api")
 public class CustomerController {
@@ -58,8 +55,11 @@ public class CustomerController {
         long customerId = session.getClientId();
         Optional<Customer> optCustomer = customerService.findCustomerById(customerId);
         Optional<Coupon> optCoupon = couponRepo.findById(couponId);
+
+
         if (optCustomer.isPresent() && optCoupon.isPresent()) {
             /* No need to check again if the coupon is present */
+
             Coupon coupon = customerService.addCoupon(customerId, couponId).get();
             return ResponseEntity.ok(coupon);
         }
@@ -188,6 +188,54 @@ public class CustomerController {
             }
         }
         throw new FetchException("Error during fetching the companies!");
+    }
+
+
+    @GetMapping("/customers/get_customer")
+    public ResponseEntity<Customer> getCustomer(
+            @RequestParam String token)
+
+            throws FetchException, InvalidLoginException {
+
+        if (!accessPermission(token)) {
+            throw new InvalidLoginException("Login time has expired or Incorrect login details - Try to login again ");
+        }
+
+        ClientSession session = tokensMap.get(token);
+        session.access();
+        long customerId = session.getClientId();
+
+        Optional<Customer> optCustomer = customerService.findCustomerById(customerId);
+        if (optCustomer.isPresent()) {
+            return ResponseEntity.ok(optCustomer.get());
+        }
+        throw new FetchException("Error during fetching the customer!");
+    }
+
+
+    @PostMapping("/customers/update_customer")
+    public ResponseEntity<Customer> updateCustomer(
+            @RequestParam String token,
+            @RequestBody Customer customer)
+            throws UpdateException, InvalidLoginException {
+
+        if (!accessPermission(token)) {
+            throw new InvalidLoginException("Login time has expired or Incorrect login details - Try to login again ");
+        }
+
+        ClientSession session = tokensMap.get(token);
+        session.access();
+
+        Optional<Customer> optCustomer = customerService.findCustomerById(customer.getId());
+        /*Check if customer is in the DB*/
+        if (optCustomer.isPresent()) {
+            Optional<Customer> updateCustomer = customerService.updateCustomer(customer);
+            /*Check if the received customer is not Empty*/
+            if (updateCustomer.isPresent()) {
+                return ResponseEntity.ok(updateCustomer.get());
+            }
+        }
+        throw new UpdateException("Error trying update the customer!");
     }
 
 

@@ -13,8 +13,9 @@ public class Company {
     private String name;
     private String email;
     private String password;
- @OneToMany(mappedBy = "company")
- @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private String logoURL;
+    @OneToMany(mappedBy = "company")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private List<Coupon> coupons;
 
     public Company() {
@@ -51,6 +52,14 @@ public class Company {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getLogoURL() {
+        return logoURL;
+    }
+
+    public void setLogoURL(String logoURL) {
+        this.logoURL = logoURL;
     }
 
     public List<Coupon> getCoupons() {

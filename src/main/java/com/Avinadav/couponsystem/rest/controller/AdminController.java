@@ -19,6 +19,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api")
+@CrossOrigin
 public class AdminController {
     private final CompanyService companyService;
     private final CustomerService customerService;
@@ -408,8 +409,34 @@ public class AdminController {
 
     }
 
+
+    /**
+     * Global function
+     * This Global function serves the site in general
+     * (Includes users who are not registered with the system)
+     * The purpose of its dedicated function is to present coupons to existing customers
+     * and mainly to attract customers who are not registered with the system (without token!)
+     */
+
+
+    @GetMapping("/admin/get_all_coupons")
+    public ResponseEntity<List<Coupon>> getAllCoupons() throws InvalidLoginException, FetchException {
+
+
+        List<Coupon> allCoupons = couponRepo.findAll();
+        Optional<List<Coupon>> coupons = Optional.of(allCoupons);
+        if (coupons.isPresent()) {
+            return ResponseEntity.ok(coupons.get());
+        }
+
+        throw new FetchException("Error during fetching the coupons!");
+
+    }
+
     private boolean accessPermission(String token) {
         return token.length() == 15 && tokensMap.containsKey(token);
     }
+
+
 
 }

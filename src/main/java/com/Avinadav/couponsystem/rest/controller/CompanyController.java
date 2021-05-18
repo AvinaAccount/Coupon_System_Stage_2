@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+@CrossOrigin
 @RestController
 @RequestMapping("/api")
 public class CompanyController {
@@ -68,7 +69,7 @@ public class CompanyController {
         if (optCoupons.isPresent()) {
             return ResponseEntity.ok(optCoupons.get());
         }
-        throw new FetchException("Error during fetching the company!");
+        throw new FetchException("Error during fetching the company coupons!");
     }
 
     @PostMapping("/company/create_coupon")
@@ -174,6 +175,50 @@ public class CompanyController {
             return ResponseEntity.ok(optCoupon.get());
         }
         throw new FetchException("Error during fetching the company!");
+    }
+
+
+    @GetMapping("/company/get_company")
+    public ResponseEntity<Company> getCompanyDetails(
+            @RequestParam String token)
+            throws FetchException, InvalidLoginException {
+
+        if (!accessPermission(token)) {
+            throw new InvalidLoginException("Login time has expired or Incorrect login details - Try to login again ");
+        }
+
+        ClientSession session = tokensMap.get(token);
+        long companyId = session.getClientId();
+        session.access();
+
+        Optional<Company> optCompany = companyService.getCompany(companyId);
+        if (optCompany.isPresent()) {
+            return ResponseEntity.ok(optCompany.get());
+        }
+        throw new FetchException("Error during fetching the company!");
+    }
+
+    @PostMapping("/company/update")
+    public ResponseEntity<Company> updateCompanyDetails(
+            @RequestParam String token,
+            @RequestBody Company company)
+            throws UpdateException, InvalidLoginException {
+
+        if (!accessPermission(token)) {
+            throw new InvalidLoginException("Login time has expired or Incorrect login details - Try to login again ");
+        }
+
+        ClientSession session = tokensMap.get(token);
+        session.access();
+
+        Optional<Company> optCompany = companyService.getCompany(company.getId());
+        if (optCompany.isPresent()) {
+            Optional<Company> updatedCompany = companyService.updateCompany(company);
+            if (updatedCompany.isPresent()) {
+                return ResponseEntity.ok(updatedCompany.get());
+            }
+        }
+        throw new UpdateException("Error trying update the company!");
     }
 
     private boolean accessPermission(String token) {

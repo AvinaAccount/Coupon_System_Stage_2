@@ -18,6 +18,7 @@ public class Coupon {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Company company;
     private String title;
+    private String description;
     @Convert(converter = LocalDateConverter.class)
     private LocalDate startDate;
     @Convert(converter = LocalDateConverter.class)
@@ -59,6 +60,14 @@ public class Coupon {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public LocalDate getStartDate() {

@@ -3,17 +3,16 @@ package com.Avinadav.couponsystem.rest.controller;
 import com.Avinadav.couponsystem.rest.ex.InvalidLoginException;
 import com.Avinadav.couponsystem.rest.login.CS_System;
 import com.Avinadav.couponsystem.rest.login.ClientSession;
+import com.Avinadav.couponsystem.rest.models.Token;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 import java.util.UUID;
 
+@CrossOrigin
 @RestController
 @RequestMapping("/api")
 public class LoginController {
@@ -31,8 +30,9 @@ public class LoginController {
         this.csSystem = csSystem;
     }
 
+
     @PostMapping("/login")
-    public ResponseEntity<String> login(
+    public ResponseEntity<Token> login(
             @RequestParam String email,
             @RequestParam String password,
             @RequestParam String type)
@@ -40,10 +40,11 @@ public class LoginController {
 
         ClientSession session = csSystem.createSession(email, password, type);
 
-        String token = generateToken(type);
+        Token token = new Token(generateToken(type));
+
         session.access();
 
-        tokensMap.put(token, session);
+        tokensMap.put(token.getToken(), session);
         return ResponseEntity.ok(token);
 
     }

@@ -34,7 +34,7 @@ public class ClientSessionCleaner {
         tokensMap.entrySet().stream()
                 .filter(e -> {
                     long lastAccess = e.getValue().getLastAccessMillis();
-                    return System.currentTimeMillis() - lastAccess >= 10_000;
+                    return System.currentTimeMillis() - lastAccess >= 50_000;
                 })
                 .map(Map.Entry::getKey)
                 .filter(Objects::nonNull)
